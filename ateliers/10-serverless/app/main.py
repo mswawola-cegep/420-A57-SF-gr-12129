@@ -9,7 +9,7 @@ from google.cloud import vision
 vision_client = vision.ImageAnnotatorClient()
 storage_client = storage.Client()
 
-project_id = None # L'ID de votre projet
+project_id = '420-A57-SF'
 
 with open('config.json') as f:
     data = f.read()
@@ -40,7 +40,6 @@ def save_results(filename, result, extension='.json'):
     blob.upload_from_string(json.dumps(result))
 # [END common functions]
 
-
 # [START functions_localize_objects]
 def localize_objects(bucket, filename):
     """Localize objects in the image on Google Cloud Storage
@@ -60,35 +59,16 @@ def localize_objects(bucket, filename):
         for vertex in object_.bounding_poly.normalized_vertices:
             print(f' - ({vertex.x}, {vertex.y})')
 
-
-    # Exercice
-    # --------
-    #
-    # Construire le dictionnaire 'result' de la forme:
-    #
-    # result = {
-    #   <id_objet_1>: {
-    #       'name': <catégorie de l'object détecté>,
-    #	    'score': <score de détection pour l'objet>,
-    #       'vertices': [
-    #            (<vertex1>), # Tuple
-    #            (<vertex2>),
-    #            (<vertex3>),
-    #            (<vertex4>)
-    #            ]
-    #       },
-    #   <id_objet_2>: {
-    #       'name': <catégorie de l'object détecté>,
-    #	    'score': <score de détection pour l'objet>,
-    #       'vertices': [
-    #            (<vertex1>),
-    #            (<vertex2>),
-    #            (<vertex3>),
-    #            (<vertex4>)
-    #            ]
-    #       },
-    #
-    #   ...
+    result = {}
+    for i, object_ in enumerate(objects):
+        vertices = []
+        for vertex in object_.bounding_poly.normalized_vertices:
+            vertices.append((vertex.x, vertex.y))
+        result[i] = {
+          'name': object_.name,
+          'score': object_.score,
+          'vertices': vertices
+        }
 
     save_results(filename, result, extension='.objects.json')
 # [END functions_localize_objects]
@@ -121,37 +101,17 @@ def detect_faces(bucket, filename):
 
         print('face bounds: {}'.format(','.join(vertices)))
 
-
-    # Exercice
-    # --------
-    #
-    # Construire le dictionnaire 'result' de la forme:
-    #
-    # result = {
-    #   <id_visage_1>: {
-    #       'anger': <resultat pour l'émotion "anger">,
-    #	    'joy': <resultat pour l'émotion "joy">,
-    #       'surprise': <resultat pour l'émotion "surprise">,
-    #       'vertices': [
-    #            (<vertex1>), # Tuple
-    #            (<vertex2>),
-    #            (<vertex3>),
-    #            (<vertex4>)
-    #            ]
-    #       },
-    #   <id_visage_2>: {
-    #       'anger': <resultat pour l'émotion "anger">,
-    #	    'joy': <resultat pour l'émotion "joy">,
-    #       'surprise': <resultat pour l'émotion "surprise">,
-    #       'vertices': [
-    #            (<vertex1>),
-    #            (<vertex2>),
-    #            (<vertex3>),
-    #            (<vertex4>)
-    #            ]
-    #       },
-    #
-    #   ...
+    result = {}
+    for i, face_ in enumerate(faces):
+        vertices = []
+        for vertex in face_.bounding_poly.vertices:
+            vertices.append((vertex.x, vertex.y))
+        result[i] = {
+          'anger': likelihood_name[face_.anger_likelihood],
+          'joy': likelihood_name[face_.joy_likelihood],
+          'surprise': likelihood_name[face_.surprise_likelihood],
+          'vertices': vertices
+        }
     
     save_results(filename, result, extension='.faces.json')
 # [END functions_detect_faces]
