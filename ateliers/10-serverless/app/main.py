@@ -9,7 +9,7 @@ from google.cloud import vision
 vision_client = vision.ImageAnnotatorClient()
 storage_client = storage.Client()
 
-project_id = '420-A57-SF'
+project_id = 'votre projet'
 
 with open('config.json') as f:
     data = f.read()
